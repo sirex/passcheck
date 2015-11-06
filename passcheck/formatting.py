@@ -18,9 +18,12 @@ def format_seconds(seconds):
     for s, unit in units:
         if seconds >= s:
             x = int(seconds // s)
+            unit = unit.rstrip('s') if x == 1 else unit
             return '{} {}'.format(format_number(x), unit)
 
-    if seconds > 1:
+    if seconds == 1:
+        return '%d second' % seconds
+    elif seconds > 1:
         return '%d seconds' % seconds
     else:
         return '%f seconds' % seconds

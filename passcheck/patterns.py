@@ -1,9 +1,6 @@
 import os.path
 
-
-def is_binary(value):
-    textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
-    return bool(value.translate(None, textchars))
+from passcheck.utils import is_binary
 
 
 class Pattern(object):
@@ -90,11 +87,7 @@ class HunspellPattern(Pattern):
         self.dpath = dpath
         self.apath = apath
 
-        try:
-            import hunspell
-        except ImportError:
-            if required:
-                raise
+        hunspell = self.import_hunspell(required)
 
         if required or (os.path.exists(dpath) and os.path.exists(apath)):
             self.hs = hunspell.HunSpell(dpath, apath)
@@ -103,6 +96,16 @@ class HunspellPattern(Pattern):
         else:
             self.hs = None
             self.word_count = 0
+
+    def import_hunspell(self, required=True):
+        try:
+            import hunspell
+        except ImportError:
+            if required:
+                raise
+            return None
+        else:
+            return hunspell
 
     def matches(self, value):
         if self.hs is None or len(value.bytes) <= 1 or is_binary(value.bytes):
